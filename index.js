@@ -411,23 +411,16 @@ function main() {
                         if (status >= 3 && status <= 6) {
                             console.log(status === 3 ? 'OrderStatusChanged filled' : 'OrderStatusChanged cancelled', id);
                             if (status === 3) {
-                                console.log(traderaddress, id, price, totalamount, quantity, quantityfilled, totalfee);
                                 latestPrice = price;
                             }
-                            var orderPrice_1 = typeof (price) !== 'string' ? price : ethers.utils.parseUnits(price, decimals);
-                            var quant_1 = ethers.utils.parseUnits('2', decimals);
-                            var signal_1 = side ? SignalTypes.BUY : SignalTypes.SELL;
+                            var orderPrice = typeof (price) !== 'string' ? price : ethers.utils.parseUnits(price, decimals);
+                            var quant = ethers.utils.parseUnits('2', decimals);
+                            var signal = side ? SignalTypes.BUY : SignalTypes.SELL;
                             if (traderaddress == mainWallet.address) {
                                 mainOpenOrders = mainOpenOrders.filter(function (order) { return order.id !== id; });
-                                setTimeout(function () {
-                                    status === 3 && addAfterFill ? addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, orderPrice_1, quant_1, signal_1) : false;
-                                }, 5000);
                             }
                             else if (traderaddress == secondWallet.address) {
                                 secondOpenOrders = secondOpenOrders.filter(function (order) { return order.id !== id; });
-                                setTimeout(function () {
-                                    status === 3 && addAfterFill ? addOrderAfterEstimation(tradePairs, tradePairId, secondWallet, orderPrice_1, quant_1, signal_1) : false;
-                                }, 5000);
                             }
                         }
                         else if (status == 0) {
@@ -493,7 +486,7 @@ function main() {
                         }
                     });
                     return [4 /*yield*/, tradePairsContract.getPastEvents('Executed', {
-                            fromBlock: latestBlock - 1000,
+                            fromBlock: latestBlock - 5000,
                             toBlock: latestBlock
                         })];
                 case 6:
@@ -519,56 +512,48 @@ function main() {
                     return [4 /*yield*/, cancelAll(tradePairs, tradePairId, secondOrderIds, secondWallet)];
                 case 8:
                     _a.sent();
-                    // // Deposit some avax and team4 for both wallets.
-                    // console.log(
-                    //     'Depositing 25 AVAX and 100 TEAM4 per wallet into portfolio...'
-                    // );
-                    // await depositToPortfolio(mainWallet, secondWallet, portfolio, baseToken, baseSymbol, decimals);
-                    // approve token usage
-                    // await approveTokenUsage(mainWallet, secondWallet, portfolio, baseToken, decimals);
-                    // enter two orders with predefined spread, around mid or last.
-                    // console.log(pairPrice);
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                    // Deposit some avax and team4 for both wallets.
+                    console.log('Depositing 25 AVAX and 100 TEAM4 per wallet into portfolio...');
+                    return [4 /*yield*/, depositToPortfolio(mainWallet, secondWallet, portfolio, baseToken, baseSymbol, decimals)];
                 case 9:
-                    // // Deposit some avax and team4 for both wallets.
-                    // console.log(
-                    //     'Depositing 25 AVAX and 100 TEAM4 per wallet into portfolio...'
-                    // );
-                    // await depositToPortfolio(mainWallet, secondWallet, portfolio, baseToken, baseSymbol, decimals);
+                    _a.sent();
                     // approve token usage
                     // await approveTokenUsage(mainWallet, secondWallet, portfolio, baseToken, decimals);
                     // enter two orders with predefined spread, around mid or last.
-                    // console.log(pairPrice);
+                    console.log("Waiting for 10 seconds ...");
+                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 10000); })];
+                case 10:
                     _a.sent();
                     spreadPrices = calcSpreadPrices(pairPrice);
                     console.log('Adding BUY and SELL orders @: ', spreadPrices.lower.toFixed(2), ' and ', spreadPrices.higher.toFixed(2), ' respectively...');
                     lowerPrice = ethers.utils.parseUnits(spreadPrices.lower.toFixed(2), decimals);
                     higherPrice = ethers.utils.parseUnits(spreadPrices.higher.toFixed(2), decimals);
                     return [4 /*yield*/, addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, lowerPrice, ethers.utils.parseUnits('5', decimals), SignalTypes.BUY)];
-                case 10:
-                    _a.sent();
-                    return [4 /*yield*/, addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, higherPrice, ethers.utils.parseUnits('5', decimals), SignalTypes.SELL)];
                 case 11:
                     _a.sent();
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                    return [4 /*yield*/, addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, higherPrice, ethers.utils.parseUnits('5', decimals), SignalTypes.SELL)];
                 case 12:
+                    _a.sent();
+                    console.log("Waiting for 5 seconds ...");
+                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                case 13:
                     _a.sent();
                     // satisfy first orders
                     console.log("Counter orders to trigger executes");
                     return [4 /*yield*/, satisfyFirstBuy(tradePairs, tradePairId, secondWallet, mainOpenOrders, decimals)];
-                case 13:
-                    _a.sent();
-                    return [4 /*yield*/, satisfyFirstSell(tradePairs, tradePairId, secondWallet, mainOpenOrders, decimals)];
                 case 14:
                     _a.sent();
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                    return [4 /*yield*/, satisfyFirstSell(tradePairs, tradePairId, secondWallet, mainOpenOrders, decimals)];
                 case 15:
                     _a.sent();
-                    console.log(mainOpenOrders.length, secondOpenOrders.length);
-                    index = 0;
-                    _a.label = 16;
+                    console.log("Waiting for 10 seconds ...");
+                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 10000); })];
                 case 16:
-                    if (!(index < 6)) return [3 /*break*/, 20];
+                    _a.sent();
+                    index = 0;
+                    _a.label = 17;
+                case 17:
+                    if (!(index < 6)) return [3 /*break*/, 21];
                     spreadPrices = calcSpreadPrices(pairPrice);
                     lowerPrice = ethers.utils.parseUnits((spreadPrices.lower - 10).toFixed(2), decimals);
                     higherPrice = ethers.utils.parseUnits((spreadPrices.higher + 10).toFixed(2), decimals);
@@ -580,21 +565,19 @@ function main() {
                     signal = Math.random() > 0.5 ? SignalTypes.BUY : SignalTypes.SELL;
                     signal2 = Math.random() > 0.5 ? SignalTypes.BUY : SignalTypes.SELL;
                     return [4 /*yield*/, addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, lowerPrice, ethers.utils.parseUnits('1', decimals), signal)];
-                case 17:
+                case 18:
                     _a.sent();
                     return [4 /*yield*/, addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, higherPrice, ethers.utils.parseUnits('1', decimals), signal2)];
-                case 18:
+                case 19:
                     _a.sent();
                     change = Math.random() > 0.5 ? 1 + Math.random() : 1 - Math.random();
                     pairPrice += change;
-                    _a.label = 19;
-                case 19:
+                    _a.label = 20;
+                case 20:
                     index++;
-                    return [3 /*break*/, 16];
-                case 20: return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                    return [3 /*break*/, 17];
                 case 21:
-                    _a.sent();
-                    console.log(mainOpenOrders.length, secondOpenOrders.length);
+                    // console.log(mainOpenOrders.length, secondOpenOrders.length)
                     console.log('Cancelling All Open Orders in 15 Seconds....');
                     return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 15000); })];
                 case 22:
@@ -608,6 +591,7 @@ function main() {
                 case 24:
                     _a.sent();
                     addAfterFill = true;
+                    console.log("Staying Alive....");
                     setInterval(function () { }, 1 << 30);
                     return [2 /*return*/];
             }

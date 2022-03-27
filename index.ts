@@ -407,14 +407,8 @@ async function main() {
                 let signal = side ? SignalTypes.BUY : SignalTypes.SELL;
                 if (traderaddress == mainWallet.address) {
                     mainOpenOrders = mainOpenOrders.filter((order) => order.id !== id);
-                    setTimeout(() => {
-                        status === 3 && addAfterFill ? addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, orderPrice, quant, signal) : false;
-                    }, 5000)
                 } else if (traderaddress == secondWallet.address){
                     secondOpenOrders = secondOpenOrders.filter((order) => order.id !== id);
-                    setTimeout(() => {
-                        status === 3 && addAfterFill ? addOrderAfterEstimation(tradePairs, tradePairId, secondWallet, orderPrice, quant, signal) : false;
-                    }, 5000)
                 }
             } else if (status == 0){
                 console.log('OrderStatusChanged added', id);
@@ -478,7 +472,7 @@ async function main() {
     );
 
     const events = await tradePairsContract.getPastEvents('Executed', {
-        fromBlock: latestBlock - 1000,
+        fromBlock: latestBlock - 10000,
         toBlock: latestBlock,
     });
     if (events.length) {
@@ -500,18 +494,18 @@ async function main() {
     await cancelAll(tradePairs, tradePairId, mainOrderIds, mainWallet);
     await cancelAll(tradePairs, tradePairId, secondOrderIds, secondWallet);
 
-    // // Deposit some avax and team4 for both wallets.
-    // console.log(
-    //     'Depositing 25 AVAX and 100 TEAM4 per wallet into portfolio...'
-    // );
-    // await depositToPortfolio(mainWallet, secondWallet, portfolio, baseToken, baseSymbol, decimals);
+    // Deposit some avax and team4 for both wallets.
+    console.log(
+        'Depositing 25 AVAX and 100 TEAM4 per wallet into portfolio...'
+    );
+    await depositToPortfolio(mainWallet, secondWallet, portfolio, baseToken, baseSymbol, decimals);
 
     // approve token usage
     // await approveTokenUsage(mainWallet, secondWallet, portfolio, baseToken, decimals);
     
     // enter two orders with predefined spread, around mid or last.
-    // console.log(pairPrice);
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log("Waiting for 10 seconds ...");
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     let spreadPrices = calcSpreadPrices(pairPrice);
     console.log(
@@ -527,6 +521,7 @@ async function main() {
     await addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, lowerPrice, ethers.utils.parseUnits('5', decimals), SignalTypes.BUY);
     await addOrderAfterEstimation(tradePairs, tradePairId, mainWallet, higherPrice, ethers.utils.parseUnits('5', decimals), SignalTypes.SELL);
 
+    console.log("Waiting for 5 seconds ...");
     await new Promise(resolve => setTimeout(resolve, 5000));
     // satisfy first orders
     console.log("Counter orders to trigger executes")
@@ -544,8 +539,10 @@ async function main() {
         mainOpenOrders,
         decimals
     );
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    console.log(mainOpenOrders.length, secondOpenOrders.length)
+
+    console.log("Waiting for 10 seconds ...");
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    // console.log(mainOpenOrders.length, secondOpenOrders.length)
 
     // enter more orders on changing price after 20 secs
     for (let index = 0; index < 6; index++) {
@@ -566,8 +563,7 @@ async function main() {
         let change = Math.random() > 0.5 ? 1 + Math.random() : 1 - Math.random();
         pairPrice += change;
     }
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    console.log(mainOpenOrders.length, secondOpenOrders.length)
+    // console.log(mainOpenOrders.length, secondOpenOrders.length)
 
     console.log('Cancelling All Open Orders in 15 Seconds....');
     await new Promise(resolve => setTimeout(resolve, 15000));
@@ -577,6 +573,7 @@ async function main() {
     await cancelAll(tradePairs, tradePairId, secondOrderIds, secondWallet);
 
     addAfterFill = true;
+    console.log("Staying Alive....")
     setInterval(() => {}, 1 << 30);
 }
 
